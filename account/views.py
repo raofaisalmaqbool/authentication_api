@@ -1,13 +1,15 @@
 import email
 from lib2to3.pgen2 import token
+from multiprocessing import context
 from django.http import Http404
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
-from account.serializers import UserLoginSerializer, UserRegistrationSerializer
+from account.serializers import UserChangePasswordSerializer, UserLoginSerializer, UserProfileSerializer, UserRegistrationSerializer
 from account.renderers import UserRenderer
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 
 
 #=== generate token manaulay
@@ -43,4 +45,21 @@ class UserLoginView(APIView):
                 return Response({'token':token, 'message': 'Login Success'}, status=status.HTTP_200_OK)
             else:
                 return Response({'errors': {'non_field_error': ['Email or Password is not Valid']}}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserProfileView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    def get(self, request, format=None):
+        serializer = UserProfileSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    
+class UserChangePasswrodView(APIView):
+    renderer_classes = [UserRenderer]
+    permission_classes = [IsAuthenticated]
+    def post(self, request, format=None):
+        serializer = UserChangePasswordSerializer(data=request.data, context={'user':request.user})
+        if serializer.is_valid(raise_exception=True):
+            return Response({'message': 'Password Change Succesfuly'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
