@@ -63,3 +63,9 @@ class UserChangePasswrodView(APIView):
         if serializer.is_valid(raise_exception=True):
             return Response({'message': 'Password Change Succesfuly'}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class SendPasswordResetEmailView(APIView):
+    renderer_classes = [UserRenderer]
+    def post(self, request, format=None):
+        pass
