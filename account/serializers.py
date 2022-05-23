@@ -80,3 +80,7 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
             return attrs
         else:
             raise ValidationErr("You are not registerd user")
+
+
+class UserPassowrdResetSerializer(serializers.Serializer):
+    pass
