@@ -1,10 +1,14 @@
 from asyncore import write
 from dataclasses import field
 from unittest.util import _MAX_LENGTH
+from xml.dom import ValidationErr
 from colorama import Style
 from django.forms import ValidationError
 from rest_framework import serializers
 from account.models import User
+from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(style={'input_type':'password'}, write_only=True)
@@ -62,3 +66,17 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=225)
     class Meta:
         fields = ['email']
+
+    def validate(self, attrs):
+        email = attrs.get('email')
+        if User.objects.filter(email=email).exists():
+            user = User.objects.get(email=email)
+            uid = urlsafe_base64_encode(force_bytes(user.id))
+            print("Encoded UID", uid)
+            token = PasswordResetTokenGenerator().make_token(user)
+            print("password reset token ", token)
+            link = 'http://localhost:3000/api/user/reset/'+uid+'/'+token
+            print("password reset link ", link)
+            return attrs
+        else:
+            raise ValidationErr("You are not registerd user")
