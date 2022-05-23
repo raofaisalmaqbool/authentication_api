@@ -56,3 +56,9 @@ class UserChangePasswordSerializer(serializers.Serializer):
         user.set_password(password)
         user.save()
         return attrs
+
+
+class SendPasswordResetEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(max_length=225)
+    class Meta:
+        fields = ['email']
