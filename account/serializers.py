@@ -5,6 +5,8 @@ from xml.dom import ValidationErr
 from colorama import Style
 from django.forms import ValidationError
 from rest_framework import serializers
+from account.utils import *
+from account import utils
 from account.models import User
 from django.utils.encoding import smart_str, force_bytes, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -77,6 +79,17 @@ class SendPasswordResetEmailSerializer(serializers.Serializer):
             print("password reset token ", token)
             link = 'http://localhost:3000/api/user/reset/'+uid+'/'+token
             print("password reset link ", link)
+            # send email
+            body = "Click following link to reset your password "+link
+            print('$$$$$$$$$$$   1')
+            data = {
+                'subject':'Reset Your Password',
+                'body': body,
+                'to_email':user.email
+            }
+            print('$$$$$$$$$$$    2')
+            Utill.send_email(data)
+            print('$$$$$$$$$$$   ok')
             return attrs
         else:
             raise ValidationErr("You are not registerd user")
